@@ -1,0 +1,25 @@
+body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index:0;}
+
+.displait-button {display:block;background:#8e44ad;font-size:17px;padding:15px;color:#fff;cursor:pointer;}
+.displait-button:hover {text-decoration:none;color:#efefef;}
+
+#displait-add-new {position:absolute;top:20px;right:20px;}
+#displait-add-new span {display:inline-block;margin:0 5px 0 0;}
+
+.displait-lightbox {position:absolute;top:0;left:0;background:#000;opacity:.8;z-index:1;}
+
+.displait-form {width:400px;background:#2ecc71;}
+.displait-form fieldset {position:relative;}
+.displait-form fieldset legend {color:#fff;font-size:35px;padding:20px;}
+.displait-form fieldset ul {}
+.displait-form fieldset ul li {padding:10px 20px 15px 20px;}
+.displait-form fieldset ul li.displait-focus {background:#28a457;}
+.displait-form fieldset ul li label {display:block;color:#fff;font-size:17px;}
+.displait-form fieldset ul li input {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:340px;}
+.displait-form fieldset div {padding:20px;}
+.displait-form fieldset div input {background:#ecf0f1;color:#27ae60;font-size:15px;padding:5px 15px;display:inline-block;margin:0 15px 0 0;border:none;}
+.displait-form fieldset div input:hover {color:#27ae60;}
+.displait-form fieldset .displait-form-close {position:absolute;font-size:20px;top:10px;right:10px;color:#fff;cursor:pointer;}
+.displait-form fieldset .displait-form-close:hover {text-decoration:none;}
+
+#displait-add-new-form {z-index:2;position:absolute;}
