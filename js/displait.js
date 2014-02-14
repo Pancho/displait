@@ -65,8 +65,7 @@ var Displait = (function () {
 
 				windowElement.draggable({
 					handle: '.displait-window-control',
-					containment: 'parent',
-					snap: '.displait-window',
+					containment: $('html'),
 					stop: function (ev, ui) {
 						r.updateWindowPosition(windowElement.data('guid'), windowElement.position().top, windowElement.position().left);
 					}
@@ -340,7 +339,7 @@ var Displait = (function () {
 }());
 
 $(function () {
-	if (!!localStorage || !!JSON) {
+	if (!!localStorage && !!JSON) {
 		Displait.initialize();
 	}
 });
