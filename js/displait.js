@@ -1,6 +1,6 @@
 var Displait = (function () {
 	var r = {
-		windowTemplate: '<div class="displait-window"><div class="displait-window-control"><a class="fa fa-bars"></a><h2>{{name}}</h2></div><iframe src="{{url}}" width="{{width}}" height="{{height}}"></iframe></div>',
+		windowTemplate: '<div class="displait-window"><div class="displait-window-control"><a class="fa fa-minus displait-window-control-collapse" title="Hide the window heading"><a class="fa fa-plus displait-window-control-show" title="Show the window heading"></a><a class="fa fa-bars displait-window-control-options" title="Show window options"></a><a class="fa fa-times-circle-o displait-window-control-remove" title="Remove this window!"></a><h2>{{name}}</h2></div><iframe src="{{url}}" width="{{width}}" height="{{height}}"></iframe></div>',
 		dimScreen: function () {
 			var body = $('body'),
 				win = $(window),
@@ -66,6 +66,28 @@ var Displait = (function () {
 					}
 				});
 
+				windowElement.on('click', '.displait-window-control-collapse', function (ev) {
+					ev.preventDefault();
+
+					$(this).closest('div').css({
+						width: 43
+					}).find('a:not(.displait-window-control-show), h2').hide();
+					$('.displait-window-control-show').show();
+				}).on('click', '.displait-window-control-show', function (ev) {
+					ev.preventDefault();
+
+					$(this).hide().closest('div').css({
+						width: '100%'
+					}).find('a:not(.displait-window-control-show), h2').show();
+				}).on('click', '.displait-window-control-remove', function (ev) {
+					var windowElement = $(this).closest('.displait-window');
+
+					ev.preventDefault();
+
+					r.removeWindow(windowElement.data('name'));
+					windowElement.remove();
+				});
+
 				windowElement.data(windowObject);
 			});
 		},
@@ -92,6 +114,18 @@ var Displait = (function () {
 			});
 
 			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
+		},
+		removeWindow: function (name) {
+			var fromStorage = JSON.parse(localStorage.getItem('displait-config')),
+				newList = [];
+
+			$.each(fromStorage, function (i, windowObject) {
+				if (windowObject.name !== name) {
+					newList.push(windowObject);
+				}
+			});
+
+			localStorage.setItem('displait-config', JSON.stringify(newList));
 		},
 		createNewWindow: function (properties) {
 			properties.x =  100;

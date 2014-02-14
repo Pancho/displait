@@ -25,8 +25,10 @@ body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index
 #displait-add-new-form {z-index:2;position:absolute;}
 
 div.displait-window {position:absolute;padding:1px 1px 0 1px;background:#2c3e50;}
-div.displait-window:hover .displait-window-control {display:block;-webkit-animation:slide 1s forwards;animation:slide 1s forwards;}
-div.displait-window .displait-window-control {cursor:move;display:none;position:absolute;top:0;left:0;width:100%;padding:15px 0;background:rgba(0,0,0,.85);}
-div.displait-window .displait-window-control a {font-size:17px;display:inline-block;color:#fff;margin:0 15px;cursor:pointer;}
-div.displait-window .displait-window-control h2 {font-size:17px;display:inline-block;color:#fff;}
+div.displait-window .displait-window-control {cursor:move;overflow:hidden;height:0;opacity:0;position:absolute;top:0;left:0;width:100%;padding:15px 0;background:rgba(0,0,0,.85);}
+div.displait-window .displait-window-control a {vertical-align:top;font-size:17px;display:inline-block;color:#fff;margin:0 15px;cursor:pointer;}
+div.displait-window .displait-window-control a.displait-window-control-show {display:none;}
+div.displait-window .displait-window-control a.displait-window-control-remove {position:absolute;right:10px;margin:0;}
+div.displait-window .displait-window-control h2 {vertical-align:top;font-size:17px;display:inline-block;color:#fff;}
 div.displait-window iframe {background-color:#fff;overflow:visible;}
+div.displait-window:hover .displait-window-control {opacity:1;height:auto;-webkit-transition:opacity .25s ease-out;transition:opacity .25s ease-out;}
