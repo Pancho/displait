@@ -14,7 +14,7 @@ var Displait = (function () {
 				'overflow': 'hidden',
 				'padding': '0 15px 0 0'
 			});
-			$(document).on('keyup.boxClose', function(ev) {
+			$(document).on('keyup.boxClose', function (ev) {
 				if (ev.keyCode == 27) {
 					r.cleanScreen();
 				}
@@ -24,6 +24,12 @@ var Displait = (function () {
 			lightbox.css({
 				'height': win.outerHeight(),
 				'width': win.outerWidth()
+			});
+		},
+		getSemiGuid: function () { // http://stackoverflow.com/a/2117523
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+				var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+				return v.toString(16);
 			});
 		},
 		saveWindow: function (obj) {
@@ -52,28 +58,30 @@ var Displait = (function () {
 					handle: '.displait-window-control',
 					containment: 'parent',
 					stop: function (ev, ui) {
-						r.updateWindowPosition(windowElement.data('name'), windowElement.position().top, windowElement.position().left);
+						r.updateWindowPosition(windowElement.data('guid'), windowElement.position().top, windowElement.position().left);
 					}
 				}).resizable({
-					handles: 'se',
-					ghost: true,
-					stop: function (ev, ui) {
-						windowElement.find('iframe').prop({
-							width: ui.size.width,
-							height: ui.size.height
-						});
-						r.updateWindowSize(windowElement.data('name'), ui.size.width, ui.size.height)
-					}
-				});
+						handles: 'se',
+						ghost: true,
+						stop: function (ev, ui) {
+							windowElement.css({
+								width: ui.size.width + 2
+							}).find('iframe').prop({
+									width: ui.size.width,
+									height: ui.size.height
+								});
+							r.updateWindowSize(windowElement.data('guid'), ui.size.width, ui.size.height)
+						}
+					});
 
-				windowElement.on('click', '.displait-window-control-collapse', function (ev) {
+				windowElement.on('click', '.displait-window-control-collapse',function (ev) {
 					ev.preventDefault();
 
 					$(this).closest('div').css({
 						width: 43
 					}).find('a:not(.displait-window-control-show), h2').hide();
 					$('.displait-window-control-show').show();
-				}).on('click', '.displait-window-control-show', function (ev) {
+				}).on('click', '.displait-window-control-show',function (ev) {
 					ev.preventDefault();
 
 					$(this).hide().closest('div').css({
@@ -84,18 +92,44 @@ var Displait = (function () {
 
 					ev.preventDefault();
 
-					r.removeWindow(windowElement.data('name'));
+					r.removeWindow(windowElement.data('guid'));
 					windowElement.remove();
+				}).on('click', '.displait-window-control-options', function (ev) {
+					var optionsElement = $('<ul class="displait-options"><li class="displait-options-update">Update Window Data</li><li class="displait-options-close">Close</li><ul>');
+
+					$('.displait-options').remove();
+					$(this).closest('.displait-window').append(optionsElement);
+
+					optionsElement.on('click', '.displait-options-update', function () {
+						r.dimScreen();
+						r.createAddNewForm(function (form) {
+							r.updateWindowData(windowElement.data('guid'), {
+								name: form.find('#displait-add-new-form-name').prop('value'),
+								url: form.find('#displait-add-new-form-url').prop('value')
+							});
+
+							windowElement.find('.displait-window-control h2').text(form.find('#displait-add-new-form-name').prop('value'));
+							windowElement.find('iframe').prop('src', form.find('#displait-add-new-form-url').prop('value'));
+							r.cleanScreen();
+						}, {
+							formName: 'Update Window Data',
+							name: windowElement.data('name'),
+							url: windowElement.data('url'),
+							buttonText: 'Update'
+						});
+					}).on('click', '.displait-options-close', function () {
+						$('.displait-options').remove();
+					});
 				});
 
 				windowElement.data(windowObject);
 			});
 		},
-		updateWindowPosition: function (name, top, left) {
+		updateWindowPosition: function (guid, top, left) {
 			var fromStorage = JSON.parse(localStorage.getItem('displait-config'));
 
 			$.each(fromStorage, function (i, windowObject) {
-				if (windowObject.name === name) {
+				if (windowObject.guid === guid) {
 					windowObject.x = left;
 					windowObject.y = top;
 				}
@@ -103,11 +137,11 @@ var Displait = (function () {
 
 			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
 		},
-		updateWindowSize: function (name, width, height) {
+		updateWindowSize: function (guid, width, height) {
 			var fromStorage = JSON.parse(localStorage.getItem('displait-config'));
 
 			$.each(fromStorage, function (i, windowObject) {
-				if (windowObject.name === name) {
+				if (windowObject.guid === guid) {
 					windowObject.width = width;
 					windowObject.height = height;
 				}
@@ -115,12 +149,25 @@ var Displait = (function () {
 
 			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
 		},
-		removeWindow: function (name) {
+		updateWindowData: function (guid, params) {
+			var fromStorage = JSON.parse(localStorage.getItem('displait-config'));
+
+			$.each(fromStorage, function (i, windowObject) {
+				if (windowObject.guid === guid) {
+					$(params, function (key, value) {
+						windowObject[key] = value;
+					});
+				}
+			});
+
+			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
+		},
+		removeWindow: function (guid) {
 			var fromStorage = JSON.parse(localStorage.getItem('displait-config')),
 				newList = [];
 
 			$.each(fromStorage, function (i, windowObject) {
-				if (windowObject.name !== name) {
+				if (windowObject.guid !== guid) {
 					newList.push(windowObject);
 				}
 			});
@@ -128,8 +175,8 @@ var Displait = (function () {
 			localStorage.setItem('displait-config', JSON.stringify(newList));
 		},
 		createNewWindow: function (properties) {
-			properties.x =  100;
-			properties.y =  100;
+			properties.x = 100;
+			properties.y = 100;
 
 			properties.width = 300;
 			properties.height = 300;
@@ -146,60 +193,70 @@ var Displait = (function () {
 			});
 			$(document).off('keyup.boxClose');
 		},
-		createAddNewForm: function () {
+		getWindowForm: function (params) {
+			var formTemplate = '<form action="" method="get" id="displait-add-new-form" class="displait-form">' +
+				'<fieldset>' +
+					'<legend>{{formName}}</legend>' +
+					'<ul>' +
+						'<li>' +
+							'<label for="displait-add-new-form-name">Window Name</label>' +
+							'<input type="text" name="displait-add-new-form-name" id="displait-add-new-form-name" required="required" value="{{name}}" />' +
+						'</li>' +
+						'<li>' +
+							'<label for="displait-add-new-form-url">URL</label>' +
+							'<input type="url" name="displait-add-new-form-url" id="displait-add-new-form-url" required="required" value="{{url}}" />' +
+						'</li>' +
+					'</ul>' +
+					'<div>' +
+						'<input type="submit" class="displait-button" name="displait-add-new-form-add" id="displait-add-new-form-add" value="{{buttonText}}" />' +
+					'</div>' +
+					'<a class="fa fa-minus-square-o displait-form-close"></a>' +
+				'</fieldset>' +
+				'</form>';
+
+			params = params || {
+				formName: 'Add New Window',
+				name: '',
+				url: 'http://',
+				buttonText: 'Add'
+			};
+
+			$.each(params, function (key, value) {
+				formTemplate = formTemplate.replace('{{' + key + '}}', value);
+			});
+
+			return formTemplate;
+		},
+		createAddNewForm: function (submitCallback, formParams) {
 			var body = $('body'),
 				win = $(window),
-				form = $('<form action="" method="get" id="displait-add-new-form" class="displait-form">' +
-						'<fieldset>' +
-							'<legend>Add New Window</legend>' +
-							'<ul>' +
-								'<li>' +
-									'<label for="displait-add-new-form-name">Window Name</label>' +
-									'<input type="text" name="displait-add-new-form-name" id="displait-add-new-form-name" required="required" value="" />' +
-								'</li>' +
-								'<li>' +
-									'<label for="displait-add-new-form-url">URL</label>' +
-									'<input type="url" name="displait-add-new-form-url" id="displait-add-new-form-url" required="required" value="" />' +
-								'</li>' +
-							'</ul>' +
-							'<div>' +
-								'<input type="submit" class="displait-button" name="displait-add-new-form-add" id="displait-add-new-form-add" value="Add" />' +
-							'</div>' +
-							'<a class="fa fa-minus-square-o displait-form-close"></a>' +
-						'</fieldset>' +
-					'</form>');
+				form = $(r.getWindowForm(formParams));
 
-				form.on('submit', function (ev) {
-					var newWindow = {};
-					ev.preventDefault();
+			submitCallback = submitCallback || function () {}; // The latter case will do nothing... But it will not break everything.
 
-					u.log('Creating new window.');
-					newWindow = r.createNewWindow({
-						name: form.find('#displait-add-new-form-name').prop('value'),
-						url: form.find('#displait-add-new-form-url').prop('value')
-					});
-					r.constructWindows([newWindow]);
-					r.cleanScreen();
-				});
+			form.on('submit', function (ev) {
+				ev.preventDefault();
+				submitCallback(form);
+			});
 
-				form.on('click', '.displait-form-close', function () {
-					r.cleanScreen();
-				});
+			form.on('click', '.displait-form-close', function () {
+				r.cleanScreen();
+			});
 
-				body.append(form);
+			body.append(form);
 
-				form.on('focus', 'input', function () {
-					$(this).closest('li').addClass('displait-focus');
-				});
+			form.on('focus', 'input', function () {
+				$(this).closest('li').addClass('displait-focus');
+			});
 
-				form.on('blur', 'input', function () {
-					$(this).closest('li').removeClass('displait-focus');
-				});
+			form.on('blur', 'input', function () {
+				$(this).closest('li').removeClass('displait-focus');
+			});
 
-				form.css({
-					'top': Math.max(0, parseInt((win.height() / 2) - (form.outerHeight() / 2))),
-					'left': Math.max(0, parseInt((win.width() / 2) - (form.outerWidth() / 2)))
-				});
+			form.css({
+				'top': Math.max(0, parseInt((win.height() / 2) - (form.outerHeight() / 2))),
+				'left': Math.max(0, parseInt((win.width() / 2) - (form.outerWidth() / 2)))
+			});
 		},
 		initAddNew: function () {
 			var body = $('body');
@@ -209,7 +266,15 @@ var Displait = (function () {
 				ev.preventDefault();
 
 				r.dimScreen();
-				r.createAddNewForm();
+				r.createAddNewForm(function (form) {
+					u.log('Creating new window.');
+					r.constructWindows([r.createNewWindow({
+						name: form.find('#displait-add-new-form-name').prop('value'),
+						guid: r.getSemiGuid(),
+						url: form.find('#displait-add-new-form-url').prop('value')
+					})]);
+					r.cleanScreen();
+				});
 			});
 		}
 	}, u = {
