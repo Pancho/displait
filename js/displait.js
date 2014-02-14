@@ -12,7 +12,7 @@ var Displait = (function () {
 
 			body.css({
 				'overflow': 'hidden',
-				'paddingRight': '15px'
+				'padding': '0 15px 0 0'
 			});
 			$(document).on('keyup.boxClose', function(ev) {
 				if (ev.keyCode == 27) {
@@ -35,10 +35,8 @@ var Displait = (function () {
 		constructWindows: function (windowObjects) {
 			var body = $('body');
 			$.each(windowObjects, function (i, windowObject) {
-				console.log(windowObject);
 				var windowElement = r.windowTemplate;
 				$.each(windowObject, function (key, value) {
-					u.log(key, value);
 					windowElement = windowElement.replace('{{' + key + '}}', value);
 				});
 
@@ -46,19 +44,65 @@ var Displait = (function () {
 				body.append(windowElement);
 
 				windowElement.css({
-					left: windowElement.x,
-					top: windowElement.y
+					left: windowObject.x,
+					top: windowObject.y
 				});
+
+				windowElement.draggable({
+					handle: '.displait-window-control',
+					containment: 'parent',
+					stop: function (ev, ui) {
+						r.updateWindowPosition(windowElement.data('name'), windowElement.position().top, windowElement.position().left);
+					}
+				}).resizable({
+					handles: 'se',
+					ghost: true,
+					stop: function (ev, ui) {
+						windowElement.find('iframe').prop({
+							width: ui.size.width,
+							height: ui.size.height
+						});
+						r.updateWindowSize(windowElement.data('name'), ui.size.width, ui.size.height)
+					}
+				});
+
+				windowElement.data(windowObject);
 			});
 		},
+		updateWindowPosition: function (name, top, left) {
+			var fromStorage = JSON.parse(localStorage.getItem('displait-config'));
+
+			$.each(fromStorage, function (i, windowObject) {
+				if (windowObject.name === name) {
+					windowObject.x = left;
+					windowObject.y = top;
+				}
+			});
+
+			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
+		},
+		updateWindowSize: function (name, width, height) {
+			var fromStorage = JSON.parse(localStorage.getItem('displait-config'));
+
+			$.each(fromStorage, function (i, windowObject) {
+				if (windowObject.name === name) {
+					windowObject.width = width;
+					windowObject.height = height;
+				}
+			});
+
+			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
+		},
 		createNewWindow: function (properties) {
-			properties.x =  20;
-			properties.y =  20;
+			properties.x =  100;
+			properties.y =  100;
 
 			properties.width = 300;
 			properties.height = 300;
 
 			r.saveWindow(properties);
+
+			return properties
 		},
 		cleanScreen: function () {
 			$('.displait-lightbox, #displait-add-new-form').remove();
@@ -92,13 +136,16 @@ var Displait = (function () {
 					'</form>');
 
 				form.on('submit', function (ev) {
+					var newWindow = {};
 					ev.preventDefault();
 
 					u.log('Creating new window.');
-					r.createNewWindow({
+					newWindow = r.createNewWindow({
 						name: form.find('#displait-add-new-form-name').prop('value'),
 						url: form.find('#displait-add-new-form-url').prop('value')
 					});
+					r.constructWindows([newWindow]);
+					r.cleanScreen();
 				});
 
 				form.on('click', '.displait-form-close', function () {
