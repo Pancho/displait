@@ -65,7 +65,8 @@ var Displait = (function () {
 
 				windowElement.draggable({
 					handle: '.displait-window-control',
-					containment: $('html'),
+					containment: 'html',
+					stack: '.displait-window',
 					stop: function (ev, ui) {
 						r.updateWindowPosition(windowElement.data('guid'), windowElement.position().top, windowElement.position().left);
 					}
