@@ -1,6 +1,15 @@
 var Displait = (function () {
 	var r = {
-		windowTemplate: '<div class="displait-window"><div class="displait-window-control"><a class="fa fa-minus displait-window-control-collapse" title="Hide the window heading"><a class="fa fa-plus displait-window-control-show" title="Show the window heading"></a><a class="fa fa-bars displait-window-control-options" title="Show window options"></a><a class="fa fa-times-circle-o displait-window-control-remove" title="Remove this window!"></a><h2>{{name}}</h2></div><iframe src="{{url}}" width="{{width}}" height="{{height}}"></iframe></div>',
+		windowTemplate: '<div class="displait-window">' +
+			'<div class="displait-window-control">' +
+				'<a class="fa fa-minus displait-window-control-collapse" title="Hide the window heading"></a>' +
+				'<a class="fa fa-plus displait-window-control-show" title="Show the window heading"></a>' +
+				'<a class="fa fa-bars displait-window-control-options" title="Show window options"></a>' +
+				'<a class="fa fa-times-circle-o displait-window-control-remove" title="Remove this window!"></a>' +
+				'<h2>{{name}}</h2>' +
+			'</div>' +
+			'<iframe src="{{url}}" width="{{width}}" height="{{height}}"></iframe>' +
+		'</div>',
 		dimScreen: function () {
 			var body = $('body'),
 				win = $(window),
@@ -57,6 +66,7 @@ var Displait = (function () {
 				windowElement.draggable({
 					handle: '.displait-window-control',
 					containment: 'parent',
+					snap: '.displait-window',
 					stop: function (ev, ui) {
 						r.updateWindowPosition(windowElement.data('guid'), windowElement.position().top, windowElement.position().left);
 					}
@@ -73,6 +83,12 @@ var Displait = (function () {
 							r.updateWindowSize(windowElement.data('guid'), ui.size.width, ui.size.height)
 						}
 					});
+
+				if (!!windowObject.refresh) {
+					windowElement.data('refresh-interval', setInterval(function () {
+						windowElement.find('iframe').prop('src', windowElement.find('iframe').prop('src'));
+					}, windowObject.refresh)); // For the time being, 30 seconds only is good enough
+				}
 
 				windowElement.on('click', '.displait-window-control-collapse',function (ev) {
 					ev.preventDefault();
@@ -95,12 +111,18 @@ var Displait = (function () {
 					r.removeWindow(windowElement.data('guid'));
 					windowElement.remove();
 				}).on('click', '.displait-window-control-options', function (ev) {
-					var optionsElement = $('<ul class="displait-options"><li class="displait-options-update">Update Window Data</li><li class="displait-options-close">Close</li><ul>');
+					var optionsElement = $('<ul class="displait-options"><li class="displait-options-update">Update Window Data</li><li class="displait-options-refresh">Refresh Every 30 Seconds</li><li class="displait-options-close">Close</li><ul>');
 
 					$('.displait-options').remove();
 					$(this).closest('.displait-window').append(optionsElement);
 
-					optionsElement.on('click', '.displait-options-update', function () {
+					if (!!windowElement.data('refresh')) {
+						optionsElement.find('.displait-options-refresh').text('Turn Refresh Off');
+					}
+
+					optionsElement.on('click', '.displait-options-update', function (ev) {
+						ev.preventDefault();
+
 						r.dimScreen();
 						r.createAddNewForm(function (form) {
 							r.updateWindowData(windowElement.data('guid'), {
@@ -118,6 +140,24 @@ var Displait = (function () {
 							buttonText: 'Update'
 						});
 					}).on('click', '.displait-options-close', function () {
+						$('.displait-options').remove();
+					}).on('click', '.displait-options-refresh', function () {
+						if (!windowElement.data('refresh')) {
+							r.updateWindowData(windowElement.data('guid'), {
+								refresh: 30000 // For the time being, 30 seconds only is good enough
+							});
+							windowElement.data('refresh', 30000);
+							windowElement.data('refresh-interval', setInterval(function () {
+								windowElement.find('iframe').prop('src', windowElement.find('iframe').prop('src'));
+							}, windowElement.data('refresh')));
+						} else {
+							r.updateWindowData(windowElement.data('guid'), {
+								refresh: 0
+							});
+							clearInterval(windowElement.data('refresh-interval'));
+							windowElement.data('refresh', 0);
+							windowElement.data('refresh-interval', 0);
+						}
 						$('.displait-options').remove();
 					});
 				});
@@ -154,7 +194,7 @@ var Displait = (function () {
 
 			$.each(fromStorage, function (i, windowObject) {
 				if (windowObject.guid === guid) {
-					$(params, function (key, value) {
+					$.each(params, function (key, value) {
 						windowObject[key] = value;
 					});
 				}
