@@ -1,4 +1,4 @@
-body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index:0;}
+body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index:0;position:relative;}
 
 .displait-button {display:block;background:#8e44ad;font-size:17px;padding:15px;color:#fff;cursor:pointer;}
 .displait-button:hover {text-decoration:none;color:#efefef;}

@@ -118,13 +118,14 @@ var Displait = (function () {
 
 				windowElement.draggable({
 					handle: '.displait-window-control',
-//					containment: 'html',
+					containment: 'body',
 					stack: '.displait-window',
 					stop: function (ev, ui) {
 						r.updateWindowPosition(windowElement.data('guid'), windowElement.position().top, windowElement.position().left);
 					}
 				}).resizable({
 						handles: 'se',
+						containment: 'html',
 						ghost: true,
 						stop: function (ev, ui) {
 							windowElement.css({
@@ -370,6 +371,18 @@ var Displait = (function () {
 		},
 		getRender: function (objectName) {
 			return window[objectName] || r.displaitIframeRender;
+		},
+		updateBodyDimensions: function () {
+			var win = $(window);
+
+			$('body').css({
+				width: win.outerWidth(),
+				height: win.outerHeight()
+			})
+		},
+		monitorBody: function () {
+			r.updateBodyDimensions();
+			$(window).on('resize', r.updateBodyDimensions);
 		}
 	}, u = {
 		log: function () {
@@ -397,6 +410,7 @@ var Displait = (function () {
 				setTimeout(u.initialize, 300); // Try again, if the renders aren't ready yet
 			} else {
 				u.log('Welcome to Displait. Knock yourself out with the windows.');
+				r.monitorBody();
 				r.constructWindows(config.windows);
 				r.initAddNew();
 			}
