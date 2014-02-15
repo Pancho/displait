@@ -1,5 +1,56 @@
 var Displait = (function () {
 	var r = {
+		displaitIframeRender: {
+			name: 'Web Page',
+			id: 'displaitIframeRender',
+			options: {
+				always: function (windowElement, optionsElement) {
+					if (!!windowElement.data('refresh')) {
+						optionsElement.find('.displait-options-refresh').text('Turn Refresh Off');
+					}
+				},
+				elements: [{
+					selector: 'displait-options-refresh',
+					text: 'Refresh Every 30 Seconds',
+					getText: function () {
+
+					},
+					handler: function (windowElement) {
+						if (!windowElement.data('refresh')) {
+							r.updateWindowData(windowElement.data('guid'), {
+								refresh: 30000 // For the time being, 30 seconds only is good enough
+							});
+							windowElement.data('refresh', 30000);
+							windowElement.data('refresh-interval', setInterval(function () {
+								windowElement.find('iframe').prop('src', windowElement.find('iframe').prop('src'));
+							}, windowElement.data('refresh')));
+						} else {
+							r.updateWindowData(windowElement.data('guid'), {
+								refresh: 0
+							});
+							clearInterval(windowElement.data('refresh-interval'));
+							windowElement.data('refresh', 0);
+							windowElement.data('refresh-interval', 0);
+						}
+						$('.displait-options').remove();
+					}
+				}]
+			},
+			getContent: function (windowObject) {
+				var content = '<iframe class="display-window-content" src="{{url}}" width="{{width}}" height="{{height}}"></iframe>';
+				$.each(windowObject, function (key, value) {
+					content = content.replace('{{' + key + '}}', value);
+				});
+				return content;
+			},
+			constructWindowSupplements: function (windowElement, windowObject) {
+				if (!!windowObject.refresh) {
+					windowElement.data('refresh-interval', setInterval(function () {
+						windowElement.find('iframe').prop('src', windowElement.find('iframe').prop('src'));
+					}, windowObject.refresh)); // For the time being, 30 seconds only is good enough
+				}
+			}
+		},
 		windowTemplate: '<div class="displait-window">' +
 			'<div class="displait-window-control">' +
 				'<a class="fa fa-minus displait-window-control-collapse" title="Hide the window heading"></a>' +
@@ -8,7 +59,7 @@ var Displait = (function () {
 				'<a class="fa fa-times-circle-o displait-window-control-remove" title="Remove this window!"></a>' +
 				'<h2>{{name}}</h2>' +
 			'</div>' +
-			'<iframe src="{{url}}" width="{{width}}" height="{{height}}"></iframe>' +
+			'{{content}}' +
 		'</div>',
 		dimScreen: function () {
 			var body = $('body'),
@@ -42,18 +93,20 @@ var Displait = (function () {
 			});
 		},
 		saveWindow: function (obj) {
-			var forSaving = JSON.parse(localStorage.getItem('displait-config'));
+			var forSaving = u.getConfig();
 
-			forSaving.push(obj);
-			localStorage.setItem('displait-config', JSON.stringify(forSaving));
+			forSaving.windows.push(obj);
+			u.saveConfig(forSaving);
 		},
 		constructWindows: function (windowObjects) {
 			var body = $('body');
 			$.each(windowObjects, function (i, windowObject) {
-				var windowElement = r.windowTemplate;
+				var windowElement = r.windowTemplate,
+					render = r.getRender(windowObject.render);
 				$.each(windowObject, function (key, value) {
 					windowElement = windowElement.replace('{{' + key + '}}', value);
 				});
+				windowElement = windowElement.replace('{{content}}', render.getContent(windowObject));
 
 				windowElement = $(windowElement);
 				body.append(windowElement);
@@ -65,7 +118,7 @@ var Displait = (function () {
 
 				windowElement.draggable({
 					handle: '.displait-window-control',
-					containment: 'html',
+//					containment: 'html',
 					stack: '.displait-window',
 					stop: function (ev, ui) {
 						r.updateWindowPosition(windowElement.data('guid'), windowElement.position().top, windowElement.position().left);
@@ -76,7 +129,7 @@ var Displait = (function () {
 						stop: function (ev, ui) {
 							windowElement.css({
 								width: ui.size.width + 2
-							}).find('iframe').prop({
+							}).find('.display-window-content').prop({
 									width: ui.size.width,
 									height: ui.size.height
 								});
@@ -84,11 +137,8 @@ var Displait = (function () {
 						}
 					});
 
-				if (!!windowObject.refresh) {
-					windowElement.data('refresh-interval', setInterval(function () {
-						windowElement.find('iframe').prop('src', windowElement.find('iframe').prop('src'));
-					}, windowObject.refresh)); // For the time being, 30 seconds only is good enough
-				}
+				// Supplements
+				render.constructWindowSupplements(windowElement, windowObject);
 
 				windowElement.on('click', '.displait-window-control-collapse',function (ev) {
 					ev.preventDefault();
@@ -111,14 +161,10 @@ var Displait = (function () {
 					r.removeWindow(windowElement.data('guid'));
 					windowElement.remove();
 				}).on('click', '.displait-window-control-options', function (ev) {
-					var optionsElement = $('<ul class="displait-options"><li class="displait-options-update">Update Window Data</li><li class="displait-options-refresh">Refresh Every 30 Seconds</li><li class="displait-options-close">Close</li><ul>');
+					var optionsElement = $('<ul class="displait-options"><ul>');
 
 					$('.displait-options').remove();
 					$(this).closest('.displait-window').append(optionsElement);
-
-					if (!!windowElement.data('refresh')) {
-						optionsElement.find('.displait-options-refresh').text('Turn Refresh Off');
-					}
 
 					optionsElement.on('click', '.displait-options-update', function (ev) {
 						ev.preventDefault();
@@ -141,58 +187,52 @@ var Displait = (function () {
 						});
 					}).on('click', '.displait-options-close', function () {
 						$('.displait-options').remove();
-					}).on('click', '.displait-options-refresh', function () {
-						if (!windowElement.data('refresh')) {
-							r.updateWindowData(windowElement.data('guid'), {
-								refresh: 30000 // For the time being, 30 seconds only is good enough
-							});
-							windowElement.data('refresh', 30000);
-							windowElement.data('refresh-interval', setInterval(function () {
-								windowElement.find('iframe').prop('src', windowElement.find('iframe').prop('src'));
-							}, windowElement.data('refresh')));
-						} else {
-							r.updateWindowData(windowElement.data('guid'), {
-								refresh: 0
-							});
-							clearInterval(windowElement.data('refresh-interval'));
-							windowElement.data('refresh', 0);
-							windowElement.data('refresh-interval', 0);
-						}
-						$('.displait-options').remove();
 					});
+
+					optionsElement.append('<li class="displait-options-update">Update Window Data</li>');
+					$.each(render.options.elements, function (i, optionObject) {
+						optionsElement.append('<li class="' + optionObject.selector + '">Refresh Every 30 Seconds</li>');
+
+						optionsElement.on('click', '.' + optionObject.selector, function () {
+							optionObject.handler(windowElement);
+						});
+					});
+					optionsElement.append('<li class="displait-options-close">Close</li>');
+
+					render.options.always(windowElement, optionsElement);
 				});
 
 				windowElement.data(windowObject);
 			});
 		},
 		updateWindowPosition: function (guid, top, left) {
-			var fromStorage = JSON.parse(localStorage.getItem('displait-config'));
+			var fromStorage = u.getConfig();
 
-			$.each(fromStorage, function (i, windowObject) {
+			$.each(fromStorage.windows, function (i, windowObject) {
 				if (windowObject.guid === guid) {
 					windowObject.x = left;
 					windowObject.y = top;
 				}
 			});
 
-			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
+			u.saveConfig(fromStorage);
 		},
 		updateWindowSize: function (guid, width, height) {
-			var fromStorage = JSON.parse(localStorage.getItem('displait-config'));
+			var fromStorage = u.getConfig();
 
-			$.each(fromStorage, function (i, windowObject) {
+			$.each(fromStorage.windows, function (i, windowObject) {
 				if (windowObject.guid === guid) {
 					windowObject.width = width;
 					windowObject.height = height;
 				}
 			});
 
-			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
+			u.saveConfig(fromStorage);
 		},
 		updateWindowData: function (guid, params) {
-			var fromStorage = JSON.parse(localStorage.getItem('displait-config'));
+			var fromStorage = u.getConfig();
 
-			$.each(fromStorage, function (i, windowObject) {
+			$.each(fromStorage.windows, function (i, windowObject) {
 				if (windowObject.guid === guid) {
 					$.each(params, function (key, value) {
 						windowObject[key] = value;
@@ -200,19 +240,19 @@ var Displait = (function () {
 				}
 			});
 
-			localStorage.setItem('displait-config', JSON.stringify(fromStorage));
+			u.saveConfig(fromStorage);
 		},
 		removeWindow: function (guid) {
-			var fromStorage = JSON.parse(localStorage.getItem('displait-config')),
+			var fromStorage = u.getConfig(),
 				newList = [];
 
-			$.each(fromStorage, function (i, windowObject) {
+			$.each(fromStorage.windows, function (i, windowObject) {
 				if (windowObject.guid !== guid) {
 					newList.push(windowObject);
 				}
 			});
 
-			localStorage.setItem('displait-config', JSON.stringify(newList));
+			u.saveConfig({renders: fromStorage.renderes, windows: newList});
 		},
 		createNewWindow: function (properties) {
 			properties.x = 100;
@@ -316,24 +356,50 @@ var Displait = (function () {
 					r.cleanScreen();
 				});
 			});
+		},
+		rendersReady: function (renders) {
+			var allReady = true;
+
+			$.each(renders, function (i, render) {
+				if (!r.getRender(render).ready) {
+					allReady = false;
+				}
+			});
+
+			return allReady;
+		},
+		getRender: function (objectName) {
+			return window[objectName] || r.displaitIframeRender;
 		}
 	}, u = {
 		log: function () {
-			if (window.top.console && window.top.console.log) {
-				window.top.console.log.apply(window.top.console, arguments);
+			if (window.console && window.console.log) {
+				window.console.log.apply(window.console, arguments);
 			}
 		},
-		initialize: function () {
-			u.log('Welcome to Displait. Knock yourself out with the windows.');
+		getConfig: function () {
+			var rawResult = localStorage.getItem('displait-config');
 
-			if (!localStorage.getItem('displait-config')) {
-				localStorage.setItem('displait-config', JSON.stringify([]));
+			if (!rawResult) {
+				localStorage.setItem('displait-config', JSON.stringify({renders: [], windows: []}));
+				return {renders: [], windows: []};
 			}
 
-			r.constructWindows(JSON.parse(localStorage.getItem('displait-config')));
-			r.initAddNew();
+			return JSON.parse(rawResult);
+		},
+		saveConfig: function (config) {
+			localStorage.setItem('displait-config', JSON.stringify(config));
+		},
+		initialize: function () {
+			var config = u.getConfig();
 
-			return this;
+			if (!r.rendersReady(config.renders)) {
+				setTimeout(u.initialize, 300); // Try again, if the renders aren't ready yet
+			} else {
+				u.log('Welcome to Displait. Knock yourself out with the windows.');
+				r.constructWindows(config.windows);
+				r.initAddNew();
+			}
 		}
 	};
 	return u;
