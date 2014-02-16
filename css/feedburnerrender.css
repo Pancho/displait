@@ -1,0 +1,13 @@
+.displait-window-content-rss {background:#ecf0f1;overflow-y:scroll;}
+.displait-window-content-rss ul {margin:0;}
+.displait-window-content-rss ul li {padding:20px;}
+.displait-window-content-rss ul li a {text-decoration:none;color:#000;}
+.displait-window-content-rss ul li a h5 {font-size:17px;margin:0 0 10px 0;}
+.displait-window-content-rss ul li a p {font-size:15px;margin:0 0 10px 0;}
+.displait-window-content-rss ul li a span {font-size:13px;}
+
+.displait-window-content-rss ul li.background0 {background:#1abc9c;}
+.displait-window-content-rss ul li.background1 {background:#7f8c8d;}
+.displait-window-content-rss ul li.background2 {background:#16a085;}
+.displait-window-content-rss ul li.background3 {background:#bdc3c7;}
+.displait-window-content-rss ul li.background4 {background:#9b59b6;}

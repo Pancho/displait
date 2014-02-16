@@ -6,7 +6,7 @@ body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index
 #displait-add-new {position:absolute;top:20px;left:20px;}
 #displait-add-new span {display:inline-block;margin:0 5px 0 0;}
 
-.displait-lightbox {position:absolute;top:0;left:0;background:#000;opacity:.8;z-index:1;}
+.displait-lightbox {position:absolute;top:0;left:0;background:#000;opacity:.8;z-index:1000;}
 
 .displait-form {width:400px;background:#2ecc71;}
 .displait-form fieldset {position:relative;}
@@ -16,15 +16,16 @@ body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index
 .displait-form fieldset ul li.displait-focus {background:#28a457;}
 .displait-form fieldset ul li label {display:block;color:#fff;font-size:17px;}
 .displait-form fieldset ul li input {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:340px;}
+.displait-form fieldset ul li select {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:360px;}
 .displait-form fieldset div {padding:20px;}
 .displait-form fieldset div input {background:#ecf0f1;color:#27ae60;font-size:15px;padding:5px 15px;display:inline-block;margin:0 15px 0 0;border:none;}
 .displait-form fieldset div input:hover {color:#27ae60;}
 .displait-form fieldset .displait-form-close {position:absolute;font-size:20px;top:10px;right:10px;color:#fff;cursor:pointer;}
 .displait-form fieldset .displait-form-close:hover {text-decoration:none;}
 
-#displait-add-new-form {z-index:2;position:absolute;}
+#displait-add-new-form {z-index:1002;position:absolute;}
 
-div.displait-window {position:absolute;padding:1px 1px 0 1px;background:#2c3e50;}
+div.displait-window {position:absolute;padding:1px;background:#2c3e50;}
 div.displait-window .displait-window-control {cursor:move;overflow:hidden;height:0;opacity:0;position:absolute;top:0;left:0;width:100%;padding:15px 0;background:rgba(0,0,0,.85);}
 div.displait-window .displait-window-control a {vertical-align:top;font-size:17px;display:inline-block;color:#fff;margin:0 15px;cursor:pointer;}
 div.displait-window .displait-window-control a.displait-window-control-show {display:none;}
