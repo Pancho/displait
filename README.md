@@ -7,7 +7,7 @@ However
 -------
 
 Provided the web page doesn't explicitly send "X-Frame-Options: SAMEORIGIN" response header, you can display any web page in any of the windows (Google does this and you can't display it).
-One the window is loaded, you can do the following:
+Once the window is loaded, you can do the following:
 * Move it around by dragging the collapsible handle
 * Resize it by dragging the handle in the lower right corner of the window
 * Rename and change its destination URL
