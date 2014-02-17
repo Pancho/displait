@@ -1,6 +1,5 @@
 var Displait = (function () {
 	var r = {
-		requiredRenderMembers: ['name', 'id', 'ready', '', '', '', '', '', '', '', '', ''],
 		displaitIframeRender: {
 			ready: true,
 			name: 'Web Page',
