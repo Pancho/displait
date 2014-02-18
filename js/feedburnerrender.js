@@ -17,7 +17,16 @@ var DisplaitFeedBurner = (function () {
 					q: windowElement.data('url')
 				},
 				success: function (data) {
-					DisplaitFeedBurner.renderFeed(windowElement, data.responseData.feed.entries);
+					try {
+						u.renderFeed(windowElement, data.responseData.feed.entries);
+					} catch (e) {
+						u.renderFeed(windowElement, [{
+							title: 'Error',
+							link: '',
+							contentSnippet: 'When loading the RSS feed we have encountered an error. Please check if the url is OK.',
+							author: 'Displait Feed Burner Render'
+						}]);
+					}
 				}
 			})
 		},
@@ -72,12 +81,15 @@ var DisplaitFeedBurner = (function () {
 			}, 300000));
 			r.refreshFeed(windowElement);
 		},
+		update: function (windowElement) {
+			r.refreshFeed(windowElement);
+		},
 		renderFeed: function (windowElement, feed) {
 			var list = $('<ul>');
 
 			$.each(feed, function (i, post) {
 				var postDate = (function () {
-					var dateParts = post.publishedDate.split(', ')[1].split(' ');
+					var dateParts = post.publishedDate && post.publishedDate.split(', ')[1].split(' ') || ['', '', ''];
 						return dateParts[0] + ' ' + dateParts[1] + ' ' + dateParts[2];
 					}()), title = post.title.length > 50 && post.title.substring(0, 50) + '&hellip;' || post.title;
 				list.append('<li class="' + r.backgroundsClasses[i % 5] + '"><a target="_blank" href="' + post.link + '"><h5>' + title + '</h5><p>' + post.contentSnippet + '</p><span>' + post.author + ', ' + postDate + '</span></a></li>');

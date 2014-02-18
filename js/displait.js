@@ -15,7 +15,7 @@ var Displait = (function () {
 					text: 'Refresh Every 30 Seconds',
 					handler: function (windowElement) {
 						if (!windowElement.data('refresh')) {
-							r.updateWindowData(windowElement.data('guid'), {
+							r.updateWindowData(windowElement, {
 								refresh: 30000 // For the time being, 30 seconds only is good enough
 							});
 							windowElement.data('refresh', 30000);
@@ -23,7 +23,7 @@ var Displait = (function () {
 								windowElement.find('iframe').prop('src', windowElement.find('iframe').prop('src'));
 							}, windowElement.data('refresh')));
 						} else {
-							r.updateWindowData(windowElement.data('guid'), {
+							r.updateWindowData(windowElement, {
 								refresh: 0
 							});
 							clearInterval(windowElement.data('refresh-interval'));
@@ -33,6 +33,9 @@ var Displait = (function () {
 						$('.displait-options').remove();
 					}
 				}]
+			},
+			update: function (windowElement) {
+				windowElement.find('iframe').prop('src', windowElement.data('url'));
 			},
 			getContent: function (windowObject) {
 				var content = '<iframe class="display-window-content" src="{{url}}" width="{{width}}" height="{{height}}"></iframe>';
@@ -171,7 +174,7 @@ var Displait = (function () {
 
 					control.hide().closest('div').css({
 						width: '100%'
-					})
+					});
 					control.closest('div').find('a:not(.displait-window-control-show), h2').show();
 				}).on('click', '.displait-window-control-remove', function (ev) {
 					var windowElement = $(this).closest('.displait-window');
@@ -191,8 +194,8 @@ var Displait = (function () {
 							ev.preventDefault();
 
 							r.dimScreen();
-							r.createAddNewForm(function (form) {
-								r.updateWindowData(windowElement.data('guid'), {
+							r.createWindowForm(function (form) {
+								r.updateWindowData(windowElement, {
 									name: form.find('#displait-add-new-form-name').prop('value'),
 									url: form.find('#displait-add-new-form-url').prop('value'),
 									render: form.find('#displait-add-new-form-render :selected').prop('value')
@@ -200,6 +203,7 @@ var Displait = (function () {
 
 								windowElement.find('.displait-window-control h2').text(form.find('#displait-add-new-form-name').prop('value'));
 								windowElement.find('iframe').prop('src', form.find('#displait-add-new-form-url').prop('value'));
+								render.update(windowElement);
 								r.cleanScreen();
 							}, {
 								formName: 'Update Window Data',
@@ -253,12 +257,13 @@ var Displait = (function () {
 
 			u.saveConfig(fromStorage);
 		},
-		updateWindowData: function (guid, params) {
+		updateWindowData: function (windowElement, params) {
 			var fromStorage = u.getConfig();
 
 			$.each(fromStorage.windows, function (i, windowObject) {
-				if (windowObject.guid === guid) {
+				if (windowObject.guid === windowElement.data('guid')) {
 					$.each(params, function (key, value) {
+						windowElement.data(key, value);
 						windowObject[key] = value;
 					});
 				}
@@ -337,7 +342,7 @@ var Displait = (function () {
 
 			return formTemplate;
 		},
-		createAddNewForm: function (submitCallback, formParams) {
+		createWindowForm: function (submitCallback, formParams) {
 			var body = $('body'),
 				win = $(window),
 				form = $(r.getWindowForm(formParams));
@@ -382,7 +387,7 @@ var Displait = (function () {
 				ev.preventDefault();
 
 				r.dimScreen();
-				r.createAddNewForm(function (form) {
+				r.createWindowForm(function (form) {
 					u.log('Creating new window.');
 					r.constructWindows([r.createNewWindow({
 						name: form.find('#displait-add-new-form-name').prop('value'),

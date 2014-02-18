@@ -59,3 +59,4 @@ Think custom window types. You can find a couple in this project, and they can s
  * 'constructWindowSupplements(windowObject, windowElement)' that gets called every time the window is constructed, so that the custom behaviour can be initialized (if needed)
  * 'getContent(windowObject)' that returns html string that will hold the contents of the url (or whatever you wish, to be honest)
  * 'resize(ev, ui, windowElement)' that gets called every time user stops the resizing action, so you can update the content element(s)
+ * 'update(windowElement)' method that gets called whenever user updates window data
