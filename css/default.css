@@ -3,7 +3,7 @@ body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index
 .displait-button {display:block;background:#8e44ad;font-size:17px;padding:15px;color:#fff;cursor:pointer;}
 .displait-button:hover {text-decoration:none;color:#efefef;}
 
-#displait-add-new {position:absolute;top:20px;left:20px;width:157px;}
+#displait-add-new {position:absolute;top:20px;left:20px;display:inline-block;}
 #displait-add-new span {display:inline-block;margin:0 5px 0 0;}
 #displait-export, #displait-import {position:absolute;width:17px;padding:2px;left:212px;}
 #displait-export {top:20px;}
