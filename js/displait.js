@@ -108,7 +108,8 @@ var Displait = (function () {
 			u.saveConfig(forSaving);
 		},
 		constructWindows: function (windowObjects) {
-			var body = $('body');
+			var body = $('body'),
+				win = $(window);
 			$.each(windowObjects, function (i, windowObject) {
 				var windowElement = r.windowTemplate,
 					render = r.getRender(windowObject.render);
@@ -122,8 +123,8 @@ var Displait = (function () {
 				body.append(windowElement);
 
 				windowElement.css({
-					left: windowObject.x,
-					top: windowObject.y
+					left: Math.min(windowObject.x, win.outerWidth() - windowElement.outerWidth()),
+					top: Math.min(windowObject.y, win.outerHeight() - windowElement.outerHeight())
 				});
 
 				windowElement.draggable({
