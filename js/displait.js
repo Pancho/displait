@@ -445,18 +445,18 @@ var Displait = (function () {
 
 			$('#displait-export').on('click', function (ev) {
 				var configString = LZString.compressToBase64(JSON.stringify(u.getConfig())),
-					formElement = {};
+					formElement = form;
 
 				if (configString.length < 1600) { // Should be enough, so we don't tire IE
-					form = form.replace('{{message}}', 'Just copy and send this url (we know it\'s weird) to the person you want to share your dashboard with.');
-					form = form.replace('{{content}}', window.location.href + '?c=' + configString);
+					formElement = formElement.replace('{{message}}', 'Just copy and send this url (we know it\'s weird) to the person you want to share your dashboard with.');
+					formElement = formElement.replace('{{content}}', window.location.href + '?c=' + configString);
 				} else {
-					form = form.replace('{{message}}', 'Just copy and send this text (we know it\'s weird) to the person you want to share your dashboard with and tell them to import it.');
-					form = form.replace('{{content}}', configString);
+					formElement = formElement.replace('{{message}}', 'Just copy and send this text (we know it\'s weird) to the person you want to share your dashboard with and tell them to import it.');
+					formElement = formElement.replace('{{content}}', configString);
 				}
-				form = form.replace('{{import}}', '');
+				formElement = formElement.replace('{{import}}', '');
 
-				formElement = $(form);
+				formElement = $(formElement);
 
 				formElement.on('submit', function (ev) {
 					ev.preventDefault();
@@ -486,13 +486,13 @@ var Displait = (function () {
 			});
 
 			$('#displait-import').on('click', function (ev) {
-				var formElement = {};
+				var formElement = form;
 
-				form = form.replace('{{message}}', 'Paste the text you received into the field below and click the Import button');
-				form = form.replace('{{content}}', '');
-				form = form.replace('{{import}}', '<div><input type="submit" class="displait-button" name="displait-share-import" id="displait-share-import" value="Import" /></div>');
+				formElement = formElement.replace('{{message}}', 'Paste the text you received into the field below and click the Import button');
+				formElement = formElement.replace('{{content}}', '');
+				formElement = formElement.replace('{{import}}', '<div><input type="submit" class="displait-button" name="displait-share-import" id="displait-share-import" value="Import" /></div>');
 
-				formElement = $(form);
+				formElement = $(formElement);
 
 				formElement.on('submit', function (ev) {
 					ev.preventDefault();

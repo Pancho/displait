@@ -20,7 +20,7 @@ body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index
 .displait-form fieldset ul li label {display:block;color:#fff;font-size:17px;}
 .displait-form fieldset ul li input {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:340px;}
 .displait-form fieldset ul li select {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:360px;}
-.displait-form fieldset ul li textarea {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:340px;max-width:340px;}
+.displait-form fieldset ul li textarea {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;min-width:340px;max-width:340px;}
 .displait-form fieldset div {padding:20px;}
 .displait-form fieldset div input {background:#ecf0f1;color:#27ae60;font-size:15px;padding:5px 15px;display:inline-block;margin:0 15px 0 0;border:none;}
 .displait-form fieldset div input:hover {color:#27ae60;}

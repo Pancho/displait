@@ -69,7 +69,7 @@ var DisplaitFeedBurner = (function () {
 		constructWindowSupplements: function (windowElement, windowObject) {
 			windowElement.data('DisplaitFeedBurner-interval', setInterval(function () {
 				r.refreshFeed(windowElement);
-			}, 30000));
+			}, 300000));
 			r.refreshFeed(windowElement);
 		},
 		renderFeed: function (windowElement, feed) {
