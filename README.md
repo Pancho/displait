@@ -13,6 +13,7 @@ Once the window is loaded, you can do the following:
 * Rename and change its destination URL
 * Force refresh every 30 seconds
 * Change the render of the window
+* Import and Export your dashboard (via URL if it's not too populated or via copy/paste text)
 
 How to deploy
 -------------
@@ -35,11 +36,6 @@ This doesn't mean it's impossible to add it at any point! Project is open source
 
 ### But I still need to see it on two different devices
 Working on it. No worries, it will be here in a matter of days. For the time being you can use some JS skills to copy contents of the localStorage to another device.
-
-Working on:
------------
-
-* Import/Export
 
 
 Renders?

@@ -3,8 +3,11 @@ body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index
 .displait-button {display:block;background:#8e44ad;font-size:17px;padding:15px;color:#fff;cursor:pointer;}
 .displait-button:hover {text-decoration:none;color:#efefef;}
 
-#displait-add-new {position:absolute;top:20px;left:20px;}
+#displait-add-new {position:absolute;top:20px;left:20px;width:157px;}
 #displait-add-new span {display:inline-block;margin:0 5px 0 0;}
+#displait-export, #displait-import {position:absolute;width:17px;padding:2px;left:212px;}
+#displait-export {top:20px;}
+#displait-import {top:46px;}
 
 .displait-lightbox {position:absolute;top:0;left:0;background:#000;opacity:.8;z-index:1000;}
 
@@ -17,13 +20,14 @@ body {font-family:'Segoe UI', 'Open Sans', sans-serif;background:#2980b9;z-index
 .displait-form fieldset ul li label {display:block;color:#fff;font-size:17px;}
 .displait-form fieldset ul li input {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:340px;}
 .displait-form fieldset ul li select {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:360px;}
+.displait-form fieldset ul li textarea {display:block;font-size:17px;margin:5px 0 0 0;padding:5px 10px;border:none;width:340px;max-width:340px;}
 .displait-form fieldset div {padding:20px;}
 .displait-form fieldset div input {background:#ecf0f1;color:#27ae60;font-size:15px;padding:5px 15px;display:inline-block;margin:0 15px 0 0;border:none;}
 .displait-form fieldset div input:hover {color:#27ae60;}
 .displait-form fieldset .displait-form-close {position:absolute;font-size:20px;top:10px;right:10px;color:#fff;cursor:pointer;}
 .displait-form fieldset .displait-form-close:hover {text-decoration:none;}
 
-#displait-add-new-form {z-index:1002;position:absolute;}
+#displait-add-new-form, #displait-share-form {z-index:1002;position:absolute;}
 
 div.displait-window {position:absolute;padding:1px;background:#2c3e50;}
 div.displait-window .displait-window-control {cursor:move;overflow:hidden;height:0;opacity:0;position:absolute;top:0;left:0;width:100%;padding:15px 0;background:rgba(0,0,0,.85);}

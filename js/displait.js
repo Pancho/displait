@@ -137,6 +137,18 @@ var Displait = (function () {
 						stop: function (ev, ui) {
 							render.resize(ev, ui, windowElement);
 							r.updateWindowSize(windowElement.data('guid'), ui.size.width, ui.size.height);
+							$("div.ui-resizable-iframeFix").each(function () {
+								this.parentNode.removeChild(this);
+							}); //Remove frame helpers
+						},
+						start: function (event, ui) {
+							windowElement.find("iframe").each(function () {
+								$('<div class="ui-resizable-iframeFix" style="background: #fff;"></div>')
+									.css({
+										width: this.offsetWidth + "px", height: this.offsetHeight + "px",
+										position: "absolute", opacity: "0.001", zIndex: 1000
+									}).css($(this).offset()).appendTo("body");
+							});
 						}
 					});
 
@@ -144,18 +156,23 @@ var Displait = (function () {
 				render.constructWindowSupplements(windowElement, windowObject);
 
 				windowElement.on('click', '.displait-window-control-collapse',function (ev) {
+					var control = $(this);
+					$('.displait-options').remove();
 					ev.preventDefault();
 
-					$(this).closest('div').css({
+					control.closest('div').css({
 						width: 43
-					}).find('a:not(.displait-window-control-show), h2').hide();
+					});
+					control.closest('div').find('a:not(.displait-window-control-show), h2').hide();
 					$('.displait-window-control-show').show();
 				}).on('click', '.displait-window-control-show',function (ev) {
+					var control = $(this);
 					ev.preventDefault();
 
-					$(this).hide().closest('div').css({
+					control.hide().closest('div').css({
 						width: '100%'
-					}).find('a:not(.displait-window-control-show), h2').show();
+					})
+					control.closest('div').find('a:not(.displait-window-control-show), h2').show();
 				}).on('click', '.displait-window-control-remove', function (ev) {
 					var windowElement = $(this).closest('.displait-window');
 
@@ -166,45 +183,49 @@ var Displait = (function () {
 				}).on('click', '.displait-window-control-options', function (ev) {
 					var optionsElement = $('<ul class="displait-options"><ul>');
 
-					$('.displait-options').remove();
-					$(this).closest('.displait-window').append(optionsElement);
-
-					optionsElement.on('click', '.displait-options-update', function (ev) {
-						ev.preventDefault();
-
-						r.dimScreen();
-						r.createAddNewForm(function (form) {
-							r.updateWindowData(windowElement.data('guid'), {
-								name: form.find('#displait-add-new-form-name').prop('value'),
-								url: form.find('#displait-add-new-form-url').prop('value'),
-								render: form.find('#displait-add-new-form-render :selected').prop('value')
-							});
-
-							windowElement.find('.displait-window-control h2').text(form.find('#displait-add-new-form-name').prop('value'));
-							windowElement.find('iframe').prop('src', form.find('#displait-add-new-form-url').prop('value'));
-							r.cleanScreen();
-						}, {
-							formName: 'Update Window Data',
-							name: windowElement.data('name'),
-							url: windowElement.data('url'),
-							selected: windowElement.data('render'),
-							buttonText: 'Update'
-						});
-					}).on('click', '.displait-options-close', function () {
+					if (windowElement.find('.displait-options').length === 0) { // Do this only if the options are not present already, otherwise just "close"
 						$('.displait-options').remove();
-					});
+						$(this).closest('.displait-window').append(optionsElement);
 
-					optionsElement.append('<li class="displait-options-update">Update Window Data</li>');
-					$.each(render.options.elements, function (i, optionObject) {
-						optionsElement.append('<li class="' + optionObject.selector + '">Refresh Every 30 Seconds</li>');
+						optionsElement.on('click', '.displait-options-update', function (ev) {
+							ev.preventDefault();
 
-						optionsElement.on('click', '.' + optionObject.selector, function () {
-							optionObject.handler(windowElement);
+							r.dimScreen();
+							r.createAddNewForm(function (form) {
+								r.updateWindowData(windowElement.data('guid'), {
+									name: form.find('#displait-add-new-form-name').prop('value'),
+									url: form.find('#displait-add-new-form-url').prop('value'),
+									render: form.find('#displait-add-new-form-render :selected').prop('value')
+								});
+
+								windowElement.find('.displait-window-control h2').text(form.find('#displait-add-new-form-name').prop('value'));
+								windowElement.find('iframe').prop('src', form.find('#displait-add-new-form-url').prop('value'));
+								r.cleanScreen();
+							}, {
+								formName: 'Update Window Data',
+								name: windowElement.data('name'),
+								url: windowElement.data('url'),
+								selected: windowElement.data('render'),
+								buttonText: 'Update'
+							});
+						}).on('click', '.displait-options-close', function () {
+							$('.displait-options').remove();
 						});
-					});
-					optionsElement.append('<li class="displait-options-close">Close</li>');
 
-					render.options.always(windowElement, optionsElement);
+						optionsElement.append('<li class="displait-options-update">Update Window Data</li>');
+						$.each(render.options.elements, function (i, optionObject) {
+							optionsElement.append('<li class="' + optionObject.selector + '">Refresh Every 30 Seconds</li>');
+
+							optionsElement.on('click', '.' + optionObject.selector, function () {
+								optionObject.handler(windowElement);
+							});
+						});
+						optionsElement.append('<li class="displait-options-close">Close</li>');
+
+						render.options.always(windowElement, optionsElement);
+					} else {
+						$('.displait-options').remove();
+					}
 				});
 			});
 		},
@@ -258,8 +279,9 @@ var Displait = (function () {
 			u.saveConfig({renders: fromStorage.renders, windows: newList});
 		},
 		createNewWindow: function (properties) {
-			properties.x = 100;
-			properties.y = 100;
+			var allWindowsCount = $('.displait-window').length;
+			properties.x = 100 + allWindowsCount * 10;
+			properties.y = 100 + allWindowsCount * 10;
 
 			properties.width = 300;
 			properties.height = 300;
@@ -269,7 +291,7 @@ var Displait = (function () {
 			return properties
 		},
 		cleanScreen: function () {
-			$('.displait-lightbox, #displait-add-new-form').remove();
+			$('.displait-lightbox, .displait-form').remove();
 			$('body').css({
 				'overflow': 'visible',
 				'paddingRight': '0'
@@ -354,7 +376,7 @@ var Displait = (function () {
 		},
 		initAddNew: function () {
 			var body = $('body');
-			body.append('<a id="displait-add-new" class="displait-button"><span class="fa fa-plus-circle"></span>Add New Window</a>');
+			body.append('<a id="displait-add-new" class="displait-button" title="Click here to add a new window"><span class="fa fa-plus-circle"></span>Add New Window</a>');
 
 			body.on('click', '#displait-add-new', function (ev) {
 				ev.preventDefault();
@@ -398,6 +420,139 @@ var Displait = (function () {
 		monitorBody: function () {
 			r.updateBodyDimensions();
 			$(window).on('resize', r.updateBodyDimensions);
+		},
+		initImportExport: function () {
+			var body = $('body'),
+				win = $(window),
+				compressed = window.location.search,
+				originalConfig = u.getConfig(),
+				form = '<form id="displait-share-form" class="displait-form" method="get" action="mailto:email@example.net" enctype="text/plain">' +
+						'<fieldset>' +
+							'<legend>Share your dashboard</legend>' +
+							'<ul>' +
+								'<li>' +
+									'<label for="displait-share-email">{{message}}</label>' +
+									'<textarea cols="1" rows="5" name="displait-share" id="displait-share" required="required">{{content}}</textarea>' +
+								'</li>' +
+							'</ul>' +
+							'{{import}}' +
+							'<a class="fa fa-minus-square-o displait-form-close"></a>' +
+						'</fieldset>' +
+					'</form>';
+
+			body.append('<a id="displait-export" class="displait-button" title="Export your dashboard"><span class="fa fa-upload"></span></a>');
+			body.append('<a id="displait-import" class="displait-button" title="Import a dashboard"><span class="fa fa-download"></span></a>');
+
+			$('#displait-export').on('click', function (ev) {
+				var configString = LZString.compressToBase64(JSON.stringify(u.getConfig())),
+					formElement = {};
+
+				if (configString.length < 1600) { // Should be enough, so we don't tire IE
+					form = form.replace('{{message}}', 'Just copy and send this url (we know it\'s weird) to the person you want to share your dashboard with.');
+					form = form.replace('{{content}}', window.location.href + '?c=' + configString);
+				} else {
+					form = form.replace('{{message}}', 'Just copy and send this text (we know it\'s weird) to the person you want to share your dashboard with and tell them to import it.');
+					form = form.replace('{{content}}', configString);
+				}
+				form = form.replace('{{import}}', '');
+
+				formElement = $(form);
+
+				formElement.on('submit', function (ev) {
+					ev.preventDefault();
+				});
+
+				formElement.on('click', '.displait-form-close', function () {
+					r.cleanScreen();
+				});
+
+				formElement.on('blur', 'textarea', function () {
+					$(this).closest('li').removeClass('displait-focus');
+				});
+
+				formElement.on('focus', 'textarea', function () {
+					$(this).closest('li').addClass('displait-focus');
+				});
+
+				r.dimScreen();
+				body.append(formElement);
+
+				formElement.find('#displait-share').select();
+
+				formElement.css({
+					'top': Math.max(0, parseInt((win.height() / 2) - (formElement.outerHeight() / 2))),
+					'left': Math.max(0, parseInt((win.width() / 2) - (formElement.outerWidth() / 2)))
+				});
+			});
+
+			$('#displait-import').on('click', function (ev) {
+				var formElement = {};
+
+				form = form.replace('{{message}}', 'Paste the text you received into the field below and click the Import button');
+				form = form.replace('{{content}}', '');
+				form = form.replace('{{import}}', '<div><input type="submit" class="displait-button" name="displait-share-import" id="displait-share-import" value="Import" /></div>');
+
+				formElement = $(form);
+
+				formElement.on('submit', function (ev) {
+					ev.preventDefault();
+
+					compressed = LZString.decompressFromBase64(formElement.find('#displait-share').prop('value'));
+					if (!!compressed) {
+						try {
+							compressed = JSON.parse(compressed);
+							if (!!compressed.windows && !!compressed.renders) { // Basic validation
+								u.saveConfig(compressed);
+								window.location.reload(); // Reload the page so the new settings kick in
+							} else {
+								u.log('Invalid JSON, Displait incompatible');
+							}
+						} catch (e) {
+							u.log('Failed to parse the text config');
+							u.saveConfig(originalConfig);
+							throw e;
+						}
+					}
+				});
+
+				formElement.on('click', '.displait-form-close', function () {
+					r.cleanScreen();
+				});
+
+				formElement.on('blur', 'textarea', function () {
+					$(this).closest('li').removeClass('displait-focus');
+				});
+
+				formElement.on('focus', 'textarea', function () {
+					$(this).closest('li').addClass('displait-focus');
+				});
+
+				r.dimScreen();
+				body.append(formElement);
+
+				formElement.css({
+					'top': Math.max(0, parseInt((win.height() / 2) - (formElement.outerHeight() / 2))),
+					'left': Math.max(0, parseInt((win.width() / 2) - (formElement.outerWidth() / 2)))
+				});
+			});
+
+			compressed = compressed.substring(3);
+			compressed = LZString.decompressFromBase64(compressed);
+			if (!!compressed) {
+				try {
+					compressed = JSON.parse(compressed);
+					if (!!compressed.windows && !!compressed.renders) {
+						u.saveConfig(compressed);
+						window.location.href = window.location.href.split('?c=')[0]; // Reload the page without the ballast from loading
+					} else {
+						u.log('Invalid JSON, Displait incompatible');
+					}
+				} catch (e) {
+					u.log('Failed to parse the url');
+					u.saveConfig(originalConfig);
+					throw e;
+				}
+			}
 		}
 	}, u = {
 		log: function () {
@@ -432,6 +587,7 @@ var Displait = (function () {
 				setTimeout(u.initialize, 300); // Try again, if the renders aren't ready yet
 			} else {
 				u.log('Welcome to Displait. Knock yourself out with the windows.');
+				r.initImportExport();
 				r.monitorBody();
 				r.constructWindows(config.windows);
 				r.initAddNew();
@@ -442,7 +598,7 @@ var Displait = (function () {
 }());
 
 $(function () {
-	if (!!localStorage && !!JSON) {
+	if (!!localStorage && !!JSON && !!LZString) {
 		Displait.initialize();
 	}
 });
