@@ -502,6 +502,7 @@ var Displait = (function () {
 						try {
 							compressed = JSON.parse(compressed);
 							if (!!compressed.windows && !!compressed.renders) { // Basic validation
+								u.archiveConfig(originalConfig);
 								u.saveConfig(compressed);
 								window.location.reload(); // Reload the page so the new settings kick in
 							} else {
@@ -542,6 +543,7 @@ var Displait = (function () {
 				try {
 					compressed = JSON.parse(compressed);
 					if (!!compressed.windows && !!compressed.renders) {
+						u.archiveConfig(originalConfig);
 						u.saveConfig(compressed);
 						window.location.href = window.location.href.split('?c=')[0]; // Reload the page without the ballast from loading
 					} else {
@@ -579,6 +581,9 @@ var Displait = (function () {
 		},
 		saveConfig: function (config) {
 			localStorage.setItem('displait-config', JSON.stringify(config));
+		},
+		archiveConfig: function (config) {
+			localStorage.setItem('displait-config-' + r.getSemiGuid(), JSON.stringify(config));
 		},
 		initialize: function () {
 			var config = u.getConfig();
